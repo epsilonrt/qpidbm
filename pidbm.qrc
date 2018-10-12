@@ -1,4 +1,4 @@
-<RCC>
+<!DOCTYPE RCC><RCC version="1.0">
     <qresource prefix="/">
         <file>images/board.png</file>
         <file>images/board_variant.png</file>

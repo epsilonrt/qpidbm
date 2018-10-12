@@ -6,9 +6,7 @@
 #include <QSqlError>
 
 class Node;
-
 class TreeModel : public QAbstractItemModel {
-    Q_OBJECT
 
   public:
     TreeModel (const QString & sqlite3Filename, QObject *parent = 0);

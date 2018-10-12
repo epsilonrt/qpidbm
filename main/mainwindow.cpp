@@ -2,7 +2,7 @@
 
 #include "mainwindow.h"
 #include "actionbutton.h"
-#include "treemodel.h"
+#include <treemodel.h>
 
 MainWindow::MainWindow() {
 
