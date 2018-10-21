@@ -1,78 +1,144 @@
-#include <QtCore>
-#include <QtSql>
-#include "node.h"
-#include "folder.h"
-#include "boardfamily.h"
-#include "gpio.h"
+#include <QFileIconProvider>
+#include "folder_p.h"
 #include "socfamily.h"
+#include "boardfamily.h"
 #include "manufacturer.h"
+#include "gpio.h"
+#include "connector.h"
 
-// ---------------------------------------------------------------------------
-//                          Class Folder
-// ---------------------------------------------------------------------------
-Folder::Folder (Type type, const QString & name, Node * parent) :
-  Node (type, parent) {
+// -----------------------------------------------------------------------------
+//                          Class FolderNode
+// -----------------------------------------------------------------------------
 
-  setFolder (true);
-  setName (name);
-  childrenFromDatabase();
+// -----------------------------------------------------------------------------
+FolderNodePrivate::FolderNodePrivate (const QString & n, Node * parent, FolderNode * q) :
+  ChildNodePrivate (parent, q), name (n) {}
+
+// -----------------------------------------------------------------------------
+FolderNode::FolderNode (FolderNodePrivate &dd) : ChildNode (dd) {}
+
+// -----------------------------------------------------------------------------
+FolderNode::FolderNode (const QString & name, Node * parent) :
+  ChildNode (* new FolderNodePrivate (name, parent, this)) {}
+
+// -----------------------------------------------------------------------------
+QString FolderNode::name() const {
+  Q_D (const FolderNode);
+
+  return  d->name;
 }
-// ---------------------------------------------------------------------------
-void Folder::childrenFromDatabase() {
+
+// -----------------------------------------------------------------------------
+QIcon FolderNode::icon() const {
+  
+  return folderIcon();
+}
+
+// -----------------------------------------------------------------------------
+QIcon FolderNode::folderIcon() {
+  static QFileIconProvider iconProvider;
+  
+  return iconProvider.icon (QFileIconProvider::Folder);
+}
+
+// -----------------------------------------------------------------------------
+//                          Class ManufacturerFolderNode
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+void ManufacturerFolderNode::getChildren() {
+  QSqlQuery q ("SELECT id FROM manufacturer", database());
 
   clearChildren();
+  q.exec();
+  while (q.next()) {
 
-  if (type() == Node::TypeBoardFamily) {
-    QSqlQuery q ("SELECT id,name FROM board_family", database());
+    int i = q.value (0).toInt();
+    if (i >= 0) {
 
-    q.exec();
-    while (q.next()) {
-
-      int i = q.value (0).toInt();
-      if (i >= 0) {
-
-        appendChild (new BoardFamilyNode (i, q.value (1).toString(), this));
-      }
-    }
-  }
-
-  else if (type() == Node::TypeGpio) {
-    QSqlQuery q ("SELECT id,name FROM gpio", database());
-
-    q.exec();
-    while (q.next()) {
-
-      int i = q.value (0).toInt();
-      if (i >= 0) {
-
-        appendChild (new GpioNode (i, q.value (1).toString(), this));
-      }
-    }
-  }
-  else if (type() == Node::TypeSocFamily) {
-    QSqlQuery q ("SELECT id,name FROM soc_family", database());
-
-    q.exec();
-    while (q.next()) {
-
-      int i = q.value (0).toInt();
-      if (i >= 0) {
-
-        appendChild (new SocFamilyNode (i, q.value (1).toString(), this));
-      }
-    }
-  }
-  else if (type() == Node::TypeManufacturer) {
-    QSqlQuery q ("SELECT id,name FROM manufacturer", database());
-
-    q.exec();
-    while (q.next()) {
-
-      int i = q.value (0).toInt();
-      if (i >= 0) {
-
-        appendChild (new Manufacturer (i, q.value (1).toString(), this));
-      }
+      append (new ManufacturerNode (i, this));
     }
   }
 }
+
+// -----------------------------------------------------------------------------
+//                          Class SocFolderNode
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+void SocFolderNode::getChildren() {
+  QSqlQuery q ("SELECT id FROM soc_family", database());
+
+  clearChildren();
+  q.exec();
+  while (q.next()) {
+
+    int i = q.value (0).toInt();
+    if (i >= 0) {
+
+      append (new SocFamilyNode (i, this));
+    }
+  }
+}
+
+
+// -----------------------------------------------------------------------------
+//                          Class BoardFolderNode
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+void BoardFolderNode::getChildren() {
+  QSqlQuery q ("SELECT id FROM board_family", database());
+
+  clearChildren();
+  q.exec();
+  while (q.next()) {
+
+    int i = q.value (0).toInt();
+    if (i >= 0) {
+
+      append (new BoardFamilyNode (i, this));
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+//                          Class GpioFolderNode
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+void GpioFolderNode::getChildren() {
+  QSqlQuery q ("SELECT id FROM gpio", database());
+
+  clearChildren();
+  q.exec();
+  while (q.next()) {
+
+    int i = q.value (0).toInt();
+    if (i >= 0) {
+
+      append (new GpioNode (i, this));
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+//                          Class ConnectorFolderNode
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+void ConnectorFolderNode::getChildren() {
+  QSqlQuery q ("SELECT id FROM connector ORDER BY id ASC", database());
+
+  clearChildren();
+  q.exec();
+  while (q.next()) {
+
+    int i = q.value (0).toInt();
+    if (i >= 0) {
+
+      append (new ConnectorNode (i, this));
+    }
+  }
+}
+

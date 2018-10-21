@@ -1,26 +1,50 @@
 #ifndef SOCFAMILY_H
 #define SOCFAMILY_H
 
-#include "node.h"
-#include "property.h"
+#include "arch.h"
+#include "folder.h"
 
-class QString;
-class SocFamilyNodePrivate;
-class SocFamilyNode : public Node {
+/**
+ * @class SocFamily
+ * @brief 
+ */
+class SocFamilyPrivate;
+class SocFamily : public Property {
   public:
 
-    SocFamilyNode (int id, const QString & name, Node * parent);
-    virtual ~SocFamilyNode();
-    virtual void childrenFromDatabase();
+    SocFamily (QSqlDatabase & database);
 
-    Property & arch();
+    Arch & arch();
+
+    bool hasName() const { return true; }
+    bool isWritable() const { return false; }
+    Type type() const { return TypeSocFamily; }
+    QString table() const;
+
+    QIcon icon() const { return FolderNode::folderIcon(); }
+
+  public slots:
+    bool readFromDatabase();
 
   protected:
-    SocFamilyNode (SocFamilyNodePrivate &dd);
+    SocFamily (SocFamilyPrivate &dd);
 
   private:
-    Q_DECLARE_PRIVATE (SocFamilyNode);
-    Q_DISABLE_COPY (SocFamilyNode);
+    Q_DECLARE_PRIVATE (SocFamily)
+    Q_DISABLE_COPY (SocFamily)
+};
+
+/**
+ * @class SocFamilyNode
+ * @brief 
+ */
+class SocFamilyNode : public PropertyNode {
+  public:
+
+    SocFamilyNode (int id, Node * parent);
+    virtual ~SocFamilyNode ();
+    SocFamily * data() const;
+    void getChildren();
 };
 
 #endif

@@ -1,27 +1,51 @@
 #ifndef BOARDMODEL_H
 #define BOARDMODEL_H
 
-#include "node.h"
+#include "boardfamily.h"
+#include "soc.h"
 
-class QString;
-class BoardModelNodePrivate;
-class BoardModelNode : public Node {
+/**
+ * @class BoardModel
+ * @brief 
+ */
+class BoardModelPrivate;
+class BoardModel : public Property {
   public:
 
-    BoardModelNode (int id, const QString & name, Node * parent);
-    virtual ~BoardModelNode();
-    virtual void childrenFromDatabase();
+    BoardModel (QSqlDatabase & database);
 
-    int familyId() const;
+    BoardFamily & family();
+    Soc & soc();
 
-    int socId() const;
-    void setSocId (int soc);
+    bool hasName() const { return true; }
+    bool isWritable() const { return true; }
+    Type type() const { return TypeBoardModel; }
+    QString table() const;
+    QIcon icon() const;
+
+  public slots:
+    bool readFromDatabase();
+    bool writeToDatabase();
 
   protected:
-    BoardModelNode (BoardModelNodePrivate &dd);
+    BoardModel (BoardModelPrivate &dd);
 
   private:
-    Q_DECLARE_PRIVATE (BoardModelNode);
-    Q_DISABLE_COPY (BoardModelNode);
+    Q_DECLARE_PRIVATE (BoardModel)
+    Q_DISABLE_COPY (BoardModel)
 };
+
+/**
+ * @class BoardModelNode
+ * @brief 
+ */
+class BoardModelNode : public PropertyNode {
+  public:
+
+    BoardModelNode (int id, Node * parent);
+    virtual ~BoardModelNode ();
+    BoardModel * data() const;
+    void getChildren();
+};
+
 #endif

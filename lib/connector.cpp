@@ -1,93 +1,169 @@
 #include "node_p.h"
+#include "property_p.h"
 #include "connector.h"
-#include "pin.h"
 
-// ---------------------------------------------------------------------------
-//                          Class ConnectorNode
-// ---------------------------------------------------------------------------
-class ConnectorNodePrivate : public NodePrivate {
+// -----------------------------------------------------------------------------
+//                          Class ConnectorPrivate
+// -----------------------------------------------------------------------------
+class ConnectorPrivate : public PropertyPrivate {
+
   public:
-    ConnectorNodePrivate (Node * parent) :
-      NodePrivate (Node::TypeConnector, parent), number (-1), rows (0),
-      family (parent->database(), 0)  {
-    }
-    int number;
-    int rows;
+    ConnectorPrivate (QSqlDatabase & database, Connector * q) :
+      PropertyPrivate (database, q),
+      family (database), rows (-1)
+    {}
     ConnectorFamily family;
-    Q_DECLARE_PUBLIC (ConnectorNode);
+    int rows;
+    Q_DECLARE_PUBLIC (Connector);
 };
-// ---------------------------------------------------------------------------
-ConnectorNode::ConnectorNode (ConnectorNodePrivate &dd) : Node (dd) {}
-// ---------------------------------------------------------------------------
-ConnectorNode::ConnectorNode (int i, int n, Node * parent) :
-  Node (* new ConnectorNodePrivate (parent)) {
+
+// -----------------------------------------------------------------------------
+//                          Class Connector
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+Connector::Connector (ConnectorPrivate &dd) : Property (dd) {}
+
+// -----------------------------------------------------------------------------
+Connector::Connector (QSqlDatabase & database) :
+  Property (* new ConnectorPrivate (database, this)) {}
+
+// -----------------------------------------------------------------------------
+QString Connector::table() const {
+  static QString t ("connector");
+
+  return t;
+}
+
+// -----------------------------------------------------------------------------
+QIcon Connector::icon() const {
+
+  return QIcon (":/images/connector.png");
+}
+
+// -----------------------------------------------------------------------------
+ConnectorFamily & Connector::family()  {
+  Q_D (Connector);
+
+  return d->family;
+}
+
+// -----------------------------------------------------------------------------
+const ConnectorFamily & Connector::family() const  {
+  Q_D (const Connector);
+
+  return d->family;
+}
+
+// -----------------------------------------------------------------------------
+int Connector::rows() const {
+  Q_D (const Connector);
+
+  return d->rows;
+}
+
+// -----------------------------------------------------------------------------
+bool Connector::readFromDatabase() {
+  Q_D (Connector);
   QSqlQuery q (database());
 
-  setId (i);
-  setNumber (n);
-  q.prepare ("SELECT name,rows,gpio_connector_family_id "
-             "FROM gpio_connector "
-             "WHERE id = ?");
-  q.addBindValue (i);
+  q.prepare ("SELECT "
+             "name,connector_family_id,rows "
+             "FROM connector "
+             "WHERE id=?");
+  q.addBindValue (d->id);
   q.exec();
 
   if (q.next()) {
+    bool hasChanged = false;
+    QString name = q.value (0).toString();
+    int connector_family_id =  q.value (1).toInt();
+    int rows =  q.value (2).toInt();
 
-    setName (q.value (0).toString());
-    setRows (q.value (1).toInt());
-    family().setId (q.value (2).toInt());
+    if (d->name != name) {
+      d->name = name;
+      hasChanged = true;
+    }
+    if (d->family.id() != connector_family_id) {
+      d->family.setId (connector_family_id);
+      hasChanged = true;
+    }
+    if (d->rows != rows) {
+      d->rows = rows;
+      hasChanged = true;
+    }
+    if (hasChanged) {
+      emit changed();
+    }
+    return true;
   }
-  childrenFromDatabase();
+
+  return false;
 }
-// ---------------------------------------------------------------------------
-void ConnectorNode::childrenFromDatabase() {
-  QSqlQuery q (database());
-  q.prepare ("SELECT gpio_pin_id,row,column "
-             "FROM gpio_connector_has_pin "
-             "WHERE gpio_connector_id = ?");
-  q.addBindValue (id());
-  q.exec();
-  clearChildren();
 
-  while (q.next()) {
+// -----------------------------------------------------------------------------
+bool Connector::writeToDatabase() {
+  Q_D (const Connector);
 
-    int i = q.value (0).toInt();
-    if (i >= 0) {
-      PinNode * p = new PinNode (i, this);
-      p->setRow (q.value (1).toInt());
-      p->setColumn (q.value (2).toInt());
-      appendChild (p);
+  if (isWritable()) {
+    QSqlQuery q (database());
+
+    if (exists()) {
+      if (hasName()) {
+        q.prepare ("UPDATE connector "
+                   "SET name=?,connector_family_id=?,rows=? "
+                   "WHERE  id=?");
+        q.addBindValue (d->name);
+        q.addBindValue (d->family.id());
+        q.addBindValue (d->rows);
+        q.addBindValue (d->id);
+      }
+    }
+    else {
+      q.prepare ("INSERT INTO connector "
+                 "(id,name,connector_family_id,rows) "
+                 "VALUES (?,?,?,?)");
+      q.addBindValue (d->id);
+      q.addBindValue (d->name);
+      q.addBindValue (d->family.id());
+      q.addBindValue (d->rows);
+    }
+
+    if (q.exec()) {
+
+      emit updated();
+      return true;
     }
   }
+  return false;
 }
-// ---------------------------------------------------------------------------
-ConnectorNode::~ConnectorNode() {}
-// ---------------------------------------------------------------------------
-int ConnectorNode::gpioId() const {
-  return parent()->id();
+
+// -----------------------------------------------------------------------------
+//                          Class ConnectorNode
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+ConnectorNode::ConnectorNode (int id, Node * parent) :
+  PropertyNode (new Connector (parent->database()), parent) {
+
+  data()->setId (id);
 }
-// ---------------------------------------------------------------------------
-int ConnectorNode::number() const {
-  Q_D (const ConnectorNode);
-  return d->number;
+
+// -----------------------------------------------------------------------------
+ConnectorNode::~ConnectorNode() {
+
+  delete data();
 }
-// ---------------------------------------------------------------------------
-void ConnectorNode::setNumber (int value) {
-  Q_D (ConnectorNode);
-  d->number = value;
+
+// -----------------------------------------------------------------------------
+Connector * ConnectorNode::data() const {
+
+  return reinterpret_cast<Connector *> (PropertyNode::data());
 }
-// ---------------------------------------------------------------------------
-int ConnectorNode::rows() const {
-  Q_D (const ConnectorNode);
-  return d->rows;
+
+// -----------------------------------------------------------------------------
+QString ConnectorNode::name() const {
+  
+  return QString ("%1 (id=%2)").arg(data()->name()).arg(data()->id());
 }
-// ---------------------------------------------------------------------------
-void ConnectorNode::setRows (int value) {
-  Q_D (ConnectorNode);
-  d->rows = value;
-}
-// ---------------------------------------------------------------------------
-ConnectorFamily & ConnectorNode::family() {
-  Q_D (ConnectorNode);
-  return d->family;
-}
+

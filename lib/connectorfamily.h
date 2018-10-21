@@ -1,26 +1,32 @@
 #ifndef CONNECTORFAMILY_H
 #define CONNECTORFAMILY_H
 
-#include "property.h"
-
+/**
+ * @class ConnectorFamily
+ * @brief 
+ */
 class ConnectorFamilyPrivate;
 class ConnectorFamily : public Property {
-    Q_OBJECT
   public:
 
-    ConnectorFamily (QSqlDatabase & database, QObject * parent = 0);
-    virtual ~ConnectorFamily();
+    ConnectorFamily (QSqlDatabase & database);
 
-    int columns() const;
+    int  columns() const;
+
+    bool hasName() const { return true; }
+    bool isWritable() const { return false; }
+    Type type() const { return TypeConnectorFamily; }
+    QString table() const;
 
   public slots:
-    virtual bool readFromDatabase();
+    bool readFromDatabase();
 
   protected:
     ConnectorFamily (ConnectorFamilyPrivate &dd);
 
   private:
-    Q_DECLARE_PRIVATE (ConnectorFamily);
-    Q_DISABLE_COPY (ConnectorFamily);
+    Q_DECLARE_PRIVATE (ConnectorFamily)
+    Q_DISABLE_COPY (ConnectorFamily)
 };
+
 #endif

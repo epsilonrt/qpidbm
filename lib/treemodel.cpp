@@ -1,34 +1,56 @@
 #include <QtCore>
 #include <QtSql>
-#include <QFileIconProvider>
 
 #include "treemodel.h"
 #include "node.h"
-#include "database.h"
+#include "folder.h"
 
 // ---------------------------------------------------------------------------
 TreeModel::TreeModel (const QString & sqlite3Filename, QObject *parent)
-  : QAbstractItemModel (parent), rootNode (0)  {
+  : QAbstractItemModel (parent), root (0)  {
 
-  db = QSqlDatabase::addDatabase ("QSQLITE");
+  static QSqlDatabase db = QSqlDatabase::addDatabase ("QSQLITE");
 
   db.setDatabaseName (sqlite3Filename);
   if (db.open()) {
 
-    rootNode = new Database (db, this);
+    root = new RootNode (db);
   }
 }
 
 // ---------------------------------------------------------------------------
 TreeModel::~TreeModel() {
 
-  db.close();
+  if (root) {
+    
+    root->database().close();
+  }
+}
+
+// ---------------------------------------------------------------------------
+bool TreeModel::isOpen() const {
+  
+  if (root) {
+    
+    return root->database().isOpen();
+  }
+  return false;
+}
+
+// ---------------------------------------------------------------------------
+QSqlError TreeModel::lastError() const {
+  
+  if (root) {
+    
+    return root->database().lastError();
+  }
+  return QSqlError();
 }
 
 // ---------------------------------------------------------------------------
 QModelIndex TreeModel::index (int row, int column,
                               const QModelIndex &parent) const {
-  if (rootNode == 0) {
+  if (root == 0) {
     return QModelIndex();
   }
   Node *parentNode = nodeFromIndex (parent);
@@ -74,56 +96,27 @@ int TreeModel::columnCount (const QModelIndex & /* parent */) const {
 
 // ---------------------------------------------------------------------------
 QVariant TreeModel::data (const QModelIndex &index, int role) const {
+  Node * node = nodeFromIndex (index);
 
-  if (role == Qt::DecorationRole) {
-    QFileIconProvider iconProvider;
+  if (node) {
+    switch (role) {
 
-    Node * node = nodeFromIndex (index);
-    if (!node) {
+      case Qt::DecorationRole:
 
-      return QVariant();
+        return node->icon();
+        break;
+
+      case Qt::DisplayRole:
+        return node->name();
+        break;
+
+      case Qt::ToolTipRole:
+        return node->toolTip();
+        break;
+
+      default:
+        break;
     }
-
-    if (node->isFolder()) {
-
-      return iconProvider.icon (QFileIconProvider::Folder);
-    }
-    else {
-
-      switch (node->type()) {
-        case Node::TypeDatabase:
-        case Node::TypeBoardFamily:
-        case Node::TypeSocFamily:
-          return iconProvider.icon (QFileIconProvider::Folder);
-        case Node::TypeBoardModel:
-          return QIcon (":/images/board.png");
-        case Node::TypeBoardVariant:
-          return QIcon (":/images/board_variant.png");
-        case Node::TypeGpio:
-          return QIcon (":/images/gpio.png");
-        case Node::TypeConnector:
-          return QIcon (":/images/connector.png");
-        case Node::TypePin:
-          return QIcon (":/images/pin.png");
-        case Node::TypeSoc:
-          return QIcon (":/images/soc.png");
-        case Node::TypeFunction:
-          return QIcon (":/images/function.png");
-        case Node::TypeManufacturer:
-          return QIcon (":/images/manufacturer.png");
-        default:
-          break;
-      }
-    }
-  }
-  else if (role == Qt::DisplayRole) {
-
-    Node * node = nodeFromIndex (index);
-    if (!node) {
-
-      return QVariant();
-    }
-    return node->name();
   }
 
   return QVariant();
@@ -135,28 +128,14 @@ QVariant TreeModel::headerData (int section,
                                 int role) const {
 
   if (section == 0 && orientation == Qt::Horizontal) {
-    QFileInfo finfo (db.databaseName());
 
-    if (finfo.exists()) {
+    if (role == Qt::DisplayRole) {
 
-      if (role == Qt::DisplayRole) {
-
-        return finfo.fileName();
-      }
-      else if (role == Qt::ToolTipRole) {
-
-        return QString ("%1:/%2").arg (db.driverName().toLower()).arg (finfo.absolutePath());
-      }
+      return root->name();
     }
-    else {
-      if (role == Qt::DisplayRole) {
+    else if (role == Qt::ToolTipRole) {
 
-        return db.databaseName();
-      }
-      else if (role == Qt::ToolTipRole) {
-
-        return QString ("%1://%2@%3:%4").arg (db.driverName().toLower()).arg (db.userName()).arg (db.hostName()).arg (db.port());
-      }
+      return root->toolTip();
     }
   }
   return QVariant();
@@ -171,6 +150,6 @@ Node *TreeModel::nodeFromIndex (const QModelIndex & index) const {
   }
   else {
 
-    return rootNode;
+    return root;
   }
 }

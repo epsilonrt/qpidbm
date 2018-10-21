@@ -1,27 +1,54 @@
 #ifndef SOC_H
 #define SOC_H
 
-#include "node.h"
-#include "property.h"
+#include "socfamily.h"
+#include "manufacturer.h"
+#include "pin.h"
 
-class QString;
-class SocNodePrivate;
-class SocNode : public Node {
+/**
+ * @class Soc
+ * @brief 
+ */
+class SocPrivate;
+class Soc : public Property {
   public:
 
-    SocNode (int id, const QString & name, Node * parent);
-    virtual ~SocNode();
-    virtual void childrenFromDatabase();
+    Soc (QSqlDatabase & database);
 
-    int familyId() const;
-    Property & manufacturer();
+    SocFamily & family();
+    Manufacturer & manufacturer();
+    int numberOfI2c() const;
+    int numberOfSpi() const;
+    int numberOfUart() const;
+
+    bool hasName() const { return true; }
+    bool isWritable() const { return true; }
+    Type type() const { return TypeSoc; }
+    QString table() const;
+    QIcon icon() const;
+
+  public slots:
+    bool readFromDatabase();
+    bool writeToDatabase();
 
   protected:
-    SocNode (SocNodePrivate &dd);
+    Soc (SocPrivate &dd);
 
   private:
-    Q_DECLARE_PRIVATE (SocNode);
-    Q_DISABLE_COPY (SocNode);
+    Q_DECLARE_PRIVATE (Soc)
+    Q_DISABLE_COPY (Soc)
+};
+
+/**
+ * @class SocNode
+ * @brief 
+ */
+class SocNode : public PropertyNode {
+  public:
+
+    SocNode (int id, Node * parent);
+    virtual ~SocNode ();
+    Soc * data() const;
 };
 
 #endif

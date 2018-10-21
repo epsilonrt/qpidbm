@@ -3,22 +3,42 @@
 
 #include <QtCore>
 #include <QtSql>
-#include "database.h"
+#include "node.h"
 
 class NodePrivate {
   public:
-    NodePrivate (Node::Type t, Node * p) :
-      type (t), id (-1), parent (p), q_ptr(0), is_folder (false), root(0) {}
-    Node::Type type;
-    int id;
-    Node * parent;
+    NodePrivate (Node * q);
+    virtual ~NodePrivate();
+
     Node * q_ptr;
-    bool is_folder;
-    Database * root;
-    QString name;
     QList<Node *> children;
 
-    void setRoot(Node * q);
-    Q_DECLARE_PUBLIC (Node);
+    Q_DECLARE_PUBLIC (Node)
 };
+
+class RootNodePrivate : public NodePrivate {
+  public:
+    RootNodePrivate (QSqlDatabase & db, RootNode * q);
+
+    QSqlDatabase & database;
+    Q_DECLARE_PUBLIC (RootNode);
+};
+
+class ChildNodePrivate : public NodePrivate {
+  public:
+    ChildNodePrivate (Node * parent, ChildNode * q);
+
+    Node * parent;
+    Q_DECLARE_PUBLIC (ChildNode);
+};
+
+class Property;
+class PropertyNodePrivate : public ChildNodePrivate {
+  public:
+    PropertyNodePrivate (Property * data, Node * parent, PropertyNode * q);
+
+    Property * data;
+    Q_DECLARE_PUBLIC (PropertyNode);
+};
+
 #endif

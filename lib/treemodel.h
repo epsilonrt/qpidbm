@@ -12,12 +12,8 @@ class TreeModel : public QAbstractItemModel {
     TreeModel (const QString & sqlite3Filename, QObject *parent = 0);
     ~TreeModel();
 
-    inline bool isOpen() const {
-      return db.isOpen();
-    }
-    inline QSqlError lastError() const {
-      return db.lastError();
-    }
+    bool isOpen() const;
+    QSqlError lastError() const;
 
     QModelIndex index (int row, int column,
                        const QModelIndex &parent) const;
@@ -29,12 +25,9 @@ class TreeModel : public QAbstractItemModel {
     QVariant headerData (int section, Qt::Orientation orientation,
                          int role) const;
 
-
   private:
-    Node *nodeFromIndex (const QModelIndex &index) const;
-
-    Node * rootNode;
-    QSqlDatabase db;
+    Node * nodeFromIndex (const QModelIndex &index) const;
+    Node * root;
 };
 
 #endif

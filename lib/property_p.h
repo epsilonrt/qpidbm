@@ -1,20 +1,16 @@
 #ifndef PROPERTY_PRIVATE_H
 #define PROPERTY_PRIVATE_H
 
-#include <QtCore>
-#include <QtSql>
 #include "property.h"
+#include "record_p.h"
 
-class PropertyPrivate {
+class PropertyPrivate : public RecordPrivate {
   public:
-    PropertyPrivate (const QString & tableName, QSqlDatabase & database, bool writable) :
-      id (-1), values (tableName, database), q_ptr (0), isWritable (writable) {}
-
+    PropertyPrivate (QSqlDatabase & database, Property * q) :
+      RecordPrivate (database, q), id(-1)
+      {}
     int id;
     QString name;
-    EnumString values;
-    Property * q_ptr;
-    bool isWritable;
     Q_DECLARE_PUBLIC (Property);
 };
 #endif

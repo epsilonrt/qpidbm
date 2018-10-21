@@ -1,48 +1,98 @@
 #include "node_p.h"
-#include "socfamily.h"
+#include "property_p.h"
 #include "soc.h"
 
-// ---------------------------------------------------------------------------
-//                          Class SocFamilyNode
-// ---------------------------------------------------------------------------
-class SocFamilyNodePrivate : public NodePrivate {
+// -----------------------------------------------------------------------------
+//                          Class SocFamilyPrivate
+// -----------------------------------------------------------------------------
+class SocFamilyPrivate : public PropertyPrivate {
+
   public:
-    SocFamilyNodePrivate (Node * parent) :
-      NodePrivate (Node::TypeSocFamily, parent),
-      arch (QString("arch"), parent->database(), false, 0) {
-    }
-    Property arch;
-    Q_DECLARE_PUBLIC (SocFamilyNode);
+    SocFamilyPrivate (QSqlDatabase & database, SocFamily * q) :
+      PropertyPrivate (database, q), arch (database)  {}
+    Arch arch;
+    Q_DECLARE_PUBLIC (SocFamily);
 };
-// ---------------------------------------------------------------------------
-SocFamilyNode::SocFamilyNode (SocFamilyNodePrivate &dd) : Node (dd) {}
-// ---------------------------------------------------------------------------
-SocFamilyNode::SocFamilyNode (int id, const QString & name, Node * parent) :
-  Node (* new SocFamilyNodePrivate (parent)) {
+
+// -----------------------------------------------------------------------------
+//                          Class SocFamily
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+SocFamily::SocFamily (SocFamilyPrivate &dd) : Property (dd) {}
+
+// -----------------------------------------------------------------------------
+SocFamily::SocFamily (QSqlDatabase & database) :
+  Property (* new SocFamilyPrivate (database, this)) {}
+
+// -----------------------------------------------------------------------------
+QString SocFamily::table() const {
+  static QString t ("soc_family");
+
+  return t;
+}
+
+// -----------------------------------------------------------------------------
+Arch & SocFamily::arch()  {
+  Q_D (SocFamily);
+
+  return d->arch;
+}
+
+// -----------------------------------------------------------------------------
+bool SocFamily::readFromDatabase() {
+  Q_D (SocFamily);
   QSqlQuery q (database());
 
-  setId (id);
-  setName (name);
-
-  q.prepare ("SELECT arch_id "
-             "FROM soc_family "
-             "WHERE id = ?");
-  q.addBindValue (id);
+  q.prepare ("SELECT name,arch_id FROM soc_family WHERE id=?");
+  q.addBindValue (d->id);
   q.exec();
 
   if (q.next()) {
+    bool hasChanged = false;
+    QString name = q.value (0).toString();
+    int arch_id =  q.value (1).toInt();
 
-    arch().setId(q.value (0).toInt());
+    if (d->name != name) {
+      d->name = name;
+      hasChanged = true;
+    }
+    if (d->arch.id() != arch_id) {
+      d->arch.setId (arch_id);
+      hasChanged = true;
+    }
+    if (hasChanged) {
+      emit changed();
+    }
+    return true;
   }
-  childrenFromDatabase();
+
+  return false;
 }
-// ---------------------------------------------------------------------------
-void SocFamilyNode::childrenFromDatabase() {
+
+// -----------------------------------------------------------------------------
+//                          Class SocFamilyNode
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+SocFamilyNode::SocFamilyNode (int id, Node * parent) :
+  PropertyNode (new SocFamily (parent->database()), parent) {
+
+  data()->setId (id);
+  getChildren();
+}
+
+// -----------------------------------------------------------------------------
+SocFamilyNode::~SocFamilyNode() {
+  
+  delete data();
+}
+
+// -----------------------------------------------------------------------------
+void SocFamilyNode::getChildren() {
   QSqlQuery q (database());
-  q.prepare ("SELECT id,name "
-             "FROM soc "
-             "WHERE soc_family_id = ?");
-  q.addBindValue (id());
+  q.prepare ("SELECT id FROM soc WHERE soc_family_id = ?");
+  q.addBindValue (data()->id());
   q.exec();
   clearChildren();
 
@@ -51,14 +101,13 @@ void SocFamilyNode::childrenFromDatabase() {
     int i = q.value (0).toInt();
     if (i >= 0) {
 
-      appendChild (new SocNode (i, q.value (1).toString(), this));
+      append (new SocNode (i, this));
     }
   }
 }
-// ---------------------------------------------------------------------------
-SocFamilyNode::~SocFamilyNode() {}
-// ---------------------------------------------------------------------------
-Property & SocFamilyNode::arch()  {
-  Q_D (SocFamilyNode);
-  return d->arch;
+
+// -----------------------------------------------------------------------------
+SocFamily * SocFamilyNode::data() const {
+
+  return reinterpret_cast<SocFamily *> (PropertyNode::data());
 }

@@ -2,23 +2,34 @@
 #define MANUFACTURER_H
 
 #include "node.h"
-#include "property.h"
 
-class QString;
-class ManufacturerPrivate;
-class Manufacturer : public Node {
+/**
+ * @class Manufacturer
+ * @brief 
+ */
+class Manufacturer : public Property {
   public:
 
-    Manufacturer (int id, const QString & name, Node * parent);
-    virtual ~Manufacturer();
-    virtual void childrenFromDatabase();
+    Manufacturer (QSqlDatabase & database) : 
+      Property(database) {}
+    QString table() const { static QString t("manufacturer");  return t; }
+    QIcon icon() const;
 
-  protected:
-    Manufacturer (ManufacturerPrivate &dd);
+    bool hasName() const { return true; }
+    bool isWritable() const { return true; }
+    Type type() const { return TypeManufacturer; }
+};
 
-  private:
-    Q_DECLARE_PRIVATE (Manufacturer);
-    Q_DISABLE_COPY (Manufacturer);
+/**
+ * @class ManufacturerNode
+ * @brief 
+ */
+class ManufacturerNode : public PropertyNode {
+  public:
+
+    ManufacturerNode (int id, Node * parent);
+    virtual ~ManufacturerNode ();
+    Manufacturer * data() const;
 };
 
 #endif

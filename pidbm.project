@@ -27,45 +27,70 @@
     <File Name="main/actionbutton.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="lib">
-    <File Name="lib/connector.cpp"/>
-    <File Name="lib/boardmodel.cpp"/>
     <File Name="lib/treemodel.h"/>
     <File Name="lib/node.cpp"/>
-    <File Name="lib/gpio.cpp"/>
-    <File Name="lib/folder.cpp"/>
-    <File Name="lib/soc.cpp"/>
-    <File Name="lib/folder.h"/>
     <File Name="lib/node_p.h"/>
-    <File Name="lib/boardvariant.h"/>
-    <File Name="lib/manufacturer.cpp"/>
-    <File Name="lib/enumstring.cpp"/>
-    <File Name="lib/boardvariant.cpp"/>
-    <File Name="lib/gpio.h"/>
-    <File Name="lib/connectorfamily.h"/>
     <File Name="lib/property_p.h"/>
-    <File Name="lib/pin.cpp"/>
     <File Name="lib/treemodel.cpp"/>
-    <File Name="lib/socfamily.cpp"/>
-    <File Name="lib/database.h"/>
-    <File Name="lib/connector.h"/>
-    <File Name="lib/manufacturer.h"/>
-    <File Name="lib/enumstring.h"/>
-    <File Name="lib/socfamily.h"/>
-    <File Name="lib/connectorfamily.cpp"/>
-    <File Name="lib/boardfamily.h"/>
     <File Name="lib/node.h"/>
-    <File Name="lib/soc.h"/>
     <File Name="lib/property.cpp"/>
-    <File Name="lib/function.h"/>
-    <File Name="lib/function.cpp"/>
     <File Name="lib/property.h"/>
-    <File Name="lib/boardfamily.cpp"/>
-    <File Name="lib/pin.h"/>
-    <File Name="lib/database.cpp"/>
-    <File Name="lib/boardmodel.h"/>
     <VirtualDirectory Name="resources">
       <File Name="lib/CMakeLists.txt"/>
     </VirtualDirectory>
+    <File Name="lib/folder.cpp"/>
+    <File Name="lib/folder.h"/>
+    <File Name="lib/folder_p.h"/>
+    <File Name="lib/arch.h"/>
+    <File Name="lib/socfamily.cpp"/>
+    <File Name="lib/socfamily.h"/>
+    <File Name="lib/soc.cpp"/>
+    <File Name="lib/soc.h"/>
+    <File Name="lib/manufacturer.cpp"/>
+    <File Name="lib/manufacturer.h"/>
+    <File Name="lib/boardfamily.cpp"/>
+    <File Name="lib/boardfamily.h"/>
+    <File Name="lib/boardmodel.cpp"/>
+    <File Name="lib/boardmodel.h"/>
+    <File Name="lib/boardvariant.cpp"/>
+    <File Name="lib/boardvariant.h"/>
+    <File Name="lib/gpio.cpp"/>
+    <File Name="lib/gpio.h"/>
+    <File Name="lib/connectorfamily.cpp"/>
+    <File Name="lib/connectorfamily.h"/>
+    <File Name="lib/connector.cpp"/>
+    <File Name="lib/connector.h"/>
+    <File Name="lib/record.h"/>
+    <File Name="lib/record_p.h"/>
+    <File Name="lib/record.cpp"/>
+    <File Name="lib/gpioconnector.cpp"/>
+    <File Name="lib/gpioconnector.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="old">
+    <File Name="old/pin.h"/>
+    <File Name="old/gpio.h"/>
+    <File Name="old/manufacturer.cpp"/>
+    <File Name="old/boardmodel.h"/>
+    <File Name="old/boardfamily.cpp"/>
+    <File Name="old/enumstring.h"/>
+    <File Name="old/boardfamily.h"/>
+    <File Name="old/enumstring.cpp"/>
+    <File Name="old/gpio.cpp"/>
+    <File Name="old/connector.h"/>
+    <File Name="old/boardvariant.cpp"/>
+    <File Name="old/pin.cpp"/>
+    <File Name="old/function.cpp"/>
+    <File Name="old/function.h"/>
+    <File Name="old/connectorfamily.h"/>
+    <File Name="old/soc.cpp"/>
+    <File Name="old/manufacturer.h"/>
+    <File Name="old/connectorfamily.cpp"/>
+    <File Name="old/boardmodel.cpp"/>
+    <File Name="old/database.h"/>
+    <File Name="old/connector.cpp"/>
+    <File Name="old/boardvariant.h"/>
+    <File Name="old/soc.h"/>
+    <File Name="old/database.cpp"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -84,7 +109,7 @@
       <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="" IntermediateDirectory="./Debug" Command="$(WorkspacePath)/cmake-build-$(WorkspaceConfiguration)/main/$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
-      <BuildSystem Name="CMake"/>
+      <BuildSystem Name="CMake">-DCMAKE_BUILD_TYPE=Debug</BuildSystem>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>

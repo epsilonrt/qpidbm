@@ -1,56 +1,34 @@
-#include "node_p.h"
 #include "manufacturer.h"
 
-// ---------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 //                          Class Manufacturer
-// ---------------------------------------------------------------------------
-class ManufacturerPrivate : public NodePrivate {
-  public:
-    ManufacturerPrivate (Node * parent) :
-      NodePrivate (Node::TypeManufacturer, parent) {
-    }
-    Q_DECLARE_PUBLIC (Manufacturer);
-};
-// ---------------------------------------------------------------------------
-Manufacturer::Manufacturer (ManufacturerPrivate &dd) : Node (dd) {}
-// ---------------------------------------------------------------------------
-Manufacturer::Manufacturer (int id, const QString & name, Node * parent) :
-  Node (* new ManufacturerPrivate (parent)) {
-  QSqlQuery q (database());
+// -----------------------------------------------------------------------------
 
-  setId (id);
-  setName (name);
+// -----------------------------------------------------------------------------
+QIcon Manufacturer::icon() const {
 
-  q.prepare ("SELECT soc_id "
-             "FROM board_model "
-             "WHERE id = ?");
-  q.addBindValue (id);
-  q.exec();
-
-  if (q.next()) {
-
-    //setSocId (q.value (0).toInt());
-  }
-  childrenFromDatabase();
+  return QIcon (":/images/manufacturer.png");
 }
-// ---------------------------------------------------------------------------
-void Manufacturer::childrenFromDatabase() {
-  QSqlQuery q (database());
-  q.prepare ("SELECT id,name "
-             "FROM board_model "
-             "WHERE board_family_id = ?");
-  q.addBindValue (id());
-  q.exec();
-  clearChildren();
 
-  while (q.next()) {
+// -----------------------------------------------------------------------------
+//                          Class ManufacturerNode
+// -----------------------------------------------------------------------------
 
-    int i = q.value (0).toInt();
-    if (i >= 0) {
+// -----------------------------------------------------------------------------
+ManufacturerNode::ManufacturerNode (int id, Node * parent) :
+  PropertyNode (new Manufacturer (parent->database()), parent) {
 
-      // appendChild (new BoardModelNode (i, q.value (1).toString(), this));
-    }
-  }
+  data()->setId (id);
 }
-// ---------------------------------------------------------------------------
-Manufacturer::~Manufacturer() {}
+
+// -----------------------------------------------------------------------------
+ManufacturerNode::~ManufacturerNode() {
+
+  delete data();
+}
+
+// -----------------------------------------------------------------------------
+Manufacturer * ManufacturerNode::data() const {
+
+  return reinterpret_cast<Manufacturer *> (PropertyNode::data());
+}

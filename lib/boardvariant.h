@@ -1,38 +1,57 @@
 #ifndef BOARDVARIANT_H
 #define BOARDVARIANT_H
 
-#include "node.h"
-#include "property.h"
+#include "boardmodel.h"
+#include "manufacturer.h"
+#include "gpio.h"
 
-class QString;
-class BoardVariantNodePrivate;
-class BoardVariantNode : public Node {
+/**
+ * @class BoardVariant
+ * @brief 
+ */
+class BoardVariantPrivate;
+class BoardVariant : public Property {
   public:
 
-    BoardVariantNode (int id, const QString & name, Node * parent);
-    virtual ~BoardVariantNode();
+    BoardVariant (QSqlDatabase & database);
 
-    int modelId() const;
-
-    const QString & tag() const;
-    void setTag (const QString & str);
-    int revision() const;
-    void setRevision (int value);
-    int ram() const;
-    void setRam (int value);
+    int ramSize() const;
     const QString & pcbRevision() const;
-    void setPcbRevision (const QString & str);
+    BoardModel & model();
+    Gpio & gpio();
+    Manufacturer & manufacturer();
+    int defaultI2c() const;
+    int defaultSpi() const;
+    int defaultUart() const;
 
-    int gpioId() const;
-    void setGpioId (int value);
+    bool hasName() const { return true; }
+    bool isWritable() const { return true; }
+    Type type() const { return TypeBoardVariant; }
+    QString table() const;
+    QIcon icon() const;
 
-    Property & manufacturer();
+  public slots:
+    bool readFromDatabase();
+    bool writeToDatabase();
 
   protected:
-    BoardVariantNode (BoardVariantNodePrivate &dd);
+    BoardVariant (BoardVariantPrivate &dd);
 
   private:
-    Q_DECLARE_PRIVATE (BoardVariantNode);
-    Q_DISABLE_COPY (BoardVariantNode);
+    Q_DECLARE_PRIVATE (BoardVariant)
+    Q_DISABLE_COPY (BoardVariant)
 };
+
+/**
+ * @class BoardVariantNode
+ * @brief 
+ */
+class BoardVariantNode : public PropertyNode {
+  public:
+
+    BoardVariantNode (int id, Node * parent);
+    virtual ~BoardVariantNode ();
+    BoardVariant * data() const;
+};
+
 #endif
