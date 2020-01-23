@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 
 ## Use the variable PROJECT_NAME for changing the target name
-set(PROJECT_NAME "pidbm")
+set(PROJECT_NAME "qpidbm")
 set(LIB_TARGET "${PROJECT_NAME}")
 set(BIN_TARGET "${PROJECT_NAME}-bin")
 
@@ -19,9 +19,9 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 find_package(Qt4 4.8 REQUIRED QtGui QtSql)
 
 include(GitVersion)
-GetGitVersion(PIDBM_VERSION)
-set(PIDBM_VERSION
-  ${PIDBM_VERSION_MAJOR}.${PIDBM_VERSION_MINOR}.${PIDBM_VERSION_PATCH})
+GetGitVersion(QPIDBM_VERSION)
+set(QPIDBM_VERSION
+  ${QPIDBM_VERSION_MAJOR}.${QPIDBM_VERSION_MINOR}.${QPIDBM_VERSION_PATCH})
 WriteGitVersionFile(${CMAKE_BINARY_DIR}/version.h)
 
 include_directories(${CMAKE_SOURCE_DIR}/lib)

@@ -1,4 +1,4 @@
-# PiDuino Database Manager
+# Qt PiDuino Database Manager
 
 _Arduino on Pi boards, the best of both worlds !_
 
@@ -10,12 +10,14 @@ The description of Pi cards uses a stored "Object" model in a database that
 allows to add new models of boards easily.  
 
 At this time, the SoC models supported are AllWinner H-Series and Broadcom 
-BCM2708 through 2710 which allows it to be used on Raspberry Pi and most Nano Pi, 
+BCM2708 through 2711 which allows it to be used on Raspberry Pi and most Nano Pi, 
 Orange Pi and Banana Pi.
 
-pidbm allows you to manage the piduino database, whether local or remote (on a 
+qpidbm allows you to manage the piduino database, whether local or remote (on a 
 server). It is a multiplatform software developed with [Qt](https://www.qt.io/)
 which allows you to add, modify or delete the different elements that make up 
 the PiDuino database (boards, GPIO, connectors, pins, SoC ...).
 
-This project is not fully functional, it is under development.
+This project is not yet functional, you can use 
+[pidbm](https://github.com/epsilonrt/pidbm) to manage the piduino database 
+from the command line.

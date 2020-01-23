@@ -19,7 +19,7 @@ MainWindow::MainWindow() {
   layout->setSizeConstraint(QLayout::SetDefaultConstraint);
   setLayout (layout);
 
-  setWindowTitle (tr ("Piduino Db Manager"));
+  setWindowTitle (tr ("Qt Piduino Db Manager"));
 }
 
 void MainWindow::openDbFile() {

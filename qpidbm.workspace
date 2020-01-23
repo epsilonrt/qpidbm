@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Workspace Name="pidbm" Database="" Version="10.0.0">
-  <Project Name="pidbm" Path="pidbm.project" Active="Yes"/>
+<CodeLite_Workspace Name="qpidbm" Database="" Version="10.0.0">
+  <Project Name="qpidbm" Path="qpidbm.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
-      <Project Name="pidbm" ConfigName="Debug"/>
+      <Project Name="qpidbm" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="no">
       <Environment/>
-      <Project Name="pidbm" ConfigName="Release"/>
+      <Project Name="qpidbm" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>
